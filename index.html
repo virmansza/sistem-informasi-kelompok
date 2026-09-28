@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Integrasi ERP, SCM &amp; CRM — PT Indofood CBP</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #f0f2f5;
+            --card:      #ffffff;
+            --shadow:    0 4px 24px rgba(0,0,0,.06);
+            --radius:    14px;
+            --accent-crm:  #3b82f6;
+            --accent-erp:  #f59e0b;
+            --accent-scm:  #10b981;
+            --text:      #1e293b;
+            --muted:     #64748b;
+            --border:    #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            color: #fff;
+            padding: 48px 24px 36px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            margin-bottom: 8px;
+        }
+        .header .subtitle {
+            font-size: 1.05rem;
+            color: #94a3b8;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .header .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .header .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+        .badge-crm  { background: rgba(59,130,246,.2); color: #93c5fd; }
+        .badge-erp  { background: rgba(245,158,11,.2); color: #fcd34d; }
+        .badge-scm  { background: rgba(16,185,129,.2); color: #6ee7b7; }
+
+        /* ========== FLOW CONNECTOR ========== */
+        .flow-arrow {
+            display: flex;
+            justify-content: center;
+            padding: 28px 0;
+        }
+        .flow-arrow .arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--muted);
+            font-size: .82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .flow-arrow .arrow svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--muted);
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(6px); }
+        }
+
+        /* ========== SECTION ========== */
+        .section {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .section-title .dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .section-title h2 {
+            font-size: 1.45rem;
+            font-weight: 700;
+        }
+        .section-title .label {
+            font-size: .82rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* ========== CARD ========== */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 800px) {
+            .card-grid { grid-template-columns: 1fr; }
+        }
+
+        .card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .card .narasi {
+            color: var(--muted);
+            font-size: .92rem;
+            margin-bottom: 18px;
+        }
+
+        /* ========== INSIGHT BOX ========== */
+        .insight-box {
+            border-radius: 12px;
+            padding: 22px 24px;
+            font-size: .9rem;
+            line-height: 1.75;
+        }
+        .insight-box .insight-title {
+            font-weight: 700;
+            font-size: .92rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .insight-box ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+        .insight-box li { margin-bottom: 6px; }
+
+        .insight-crm {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 5px solid var(--accent-crm);
+            color: #1e3a5f;
+        }
+        .insight-erp {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-left: 5px solid var(--accent-erp);
+            color: #78350f;
+        }
+        .insight-scm {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-left: 5px solid var(--accent-scm);
+            color: #064e3b;
+        }
+
+        /* ========== KPI ROW ========== */
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .kpi {
+            flex: 1;
+            min-width: 140px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .kpi .value {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+        .kpi .label {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-weight: 600;
+        }
+        .kpi .trend {
+            font-size: .78rem;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        .trend-up   { color: #dc2626; }
+        .trend-down { color: #16a34a; }
+        .trend-warn { color: #d97706; }
+
+        /* ========== CHART WRAPPER ========== */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+        .chart-wrap canvas {
+            width: 100% !important;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-size: .82rem;
+        }
+        .footer a { color: var(--accent-crm); text-decoration: none; }
+
+        /* ========== SUMMARY BANNER ========== */
+        .summary-banner {
+            max-width: 1120px;
+            margin: 0 auto 32px;
+            padding: 0 20px;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 32px 36px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.15);
+        }
+        .summary-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 14px;
+            color: #e2e8f0;
+        }
+        .summary-card p {
+            color: #94a3b8;
+            font-size: .92rem;
+            line-height: 1.8;
+        }
+        .summary-card strong { color: #fff; }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!--                         HEADER                                -->
+<!-- ============================================================ -->
+<header class="header">
+    <h1>📊 Dashboard Integrasi ERP, SCM &amp; CRM</h1>
+    <p class="subtitle">
+        Analisis End-to-End Proses Bisnis <strong>PT Indofood CBP Sukses Makmur</strong> — 
+        Menghadapi Lonjakan Permintaan <em>Indomie</em> Menjelang Bulan Puasa (Q1 2026)
+    </p>
+    <div class="badge-row">
+        <span class="badge badge-crm">🎯 CRM — Ujung Tombak</span>
+        <span class="badge badge-erp">🏭 ERP — Dapur Operasional</span>
+        <span class="badge badge-scm">🚛 SCM — Tulang Punggung</span>
+    </div>
+</header>
+
+<!-- ============================================================ -->
+<!--                  BAGIAN A — CRM                               -->
+<!-- ============================================================ -->
+<div style="padding-top: 40px;"></div>
+<div class="section">
+    <div class="section-title">
+        <div class="dot" style="background: var(--accent-crm);"></div>
+        <div>
+            <h2>Bagian A: CRM — Customer Relationship Management</h2>
+            <span class="label">Ujung Tombak Penjualan &amp; Demand Sensing</span>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-crm);">63.000</div>
+            <div class="label">Total Pesanan (Karton)</div>
+            <div class="trend trend-up">▲ +300% dari baseline</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-crm);">47</div>
+            <div class="label">Distributor Aktif</div>
+            <div class="trend trend-up">▲ 12 distributor baru</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-crm);">20.000</div>
+            <div class="label">Pesanan Puncak (Karton)</div>
+            <div class="trend trend-warn">⚠ 4x rata-rata harian</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-crm);">98.2%</div>
+            <div class="label">Tingkat Retensi</div>
+            <div class="trend trend-down">✓ Stabil</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-grid">
+            <!-- Chart -->
+            <div>
+                <h3>📈 Tren Volume Pesanan Distributor (Q1 2026)</h3>
+                <p class="narasi">
+                    Modul CRM mencatat lonjakan dramatis pesanan dari jaringan distributor menjelang bulan Puasa. 
+                    Tren ini menjadi <strong>early warning signal</strong> bagi seluruh rantai operasional perusahaan.
+                </p>
+                <div class="chart-wrap">
+                    <canvas id="chartCRM" height="280"></canvas>
+                </div>
+            </div>
+            <!-- Insight -->
+            <div class="insight-box insight-crm">
+                <div class="insight-title">🔍 Insight Integrasi CRM</div>
+                <p>
+                    Data CRM menunjukkan pola <strong>seasonal spike</strong> yang konsisten: pesanan melonjak dari 
+                    <strong>5.000 karton</strong> di awal Januari menjadi <strong>20.000 karton</strong> pada 12 Maret 2026 
+                    — peningkatan <strong>300%</strong> dalam 2 bulan.
+                </p>
+                <ul>
+                    <li><strong>Demand Sensing:</strong> Sistem CRM mendeteksi anomali permintaan sejak 2 Februari (12.000 karton), 
+                        memberi lead time ~6 minggu bagi modul ERP untuk menyesuaikan kapasitas produksi.</li>
+                    <li><strong>Trigger ke ERP:</strong> Data pesanan CRM secara otomatis ter-<em>feed</em> ke modul 
+                        <strong>MPS (Master Production Schedule)</strong> ERP melalui integrasi API, mengubah forecast 
+                        menjadi <em>firm planned orders</em>.</li>
+                    <li><strong>Customer Segmentation:</strong> CRM mengidentifikasi bahwa 70% lonjakan berasal dari 
+                        distributor Tier-1 di Pulau Jawa, membantu SCM memprioritaskan rute logistik.</li>
+                    <li><strong>Efek Domino:</strong> Tanpa integrasi CRM→ERP, pabrik baru bereaksi <em>setelah</em> 
+                        stok habis. Dengan integrasi, pabrik dapat melakukan <strong>pre-emptive capacity planning</strong>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+    <div class="arrow">
+        <span>Data CRM mengalir ke ERP</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        <svg viewBox="0 0 24 24" style="transform: rotate(90deg);"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                  BAGIAN B — ERP                               -->
+<!-- ============================================================ -->
+<div class="section">
+    <div class="section-title">
+        <div class="dot" style="background: var(--accent-erp);"></div>
+        <div>
+            <h2>Bagian B: ERP — Enterprise Resource Planning</h2>
+            <span class="label">Dapur Operasional &amp; Kapasitas Pabrik</span>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-erp);">85.000</div>
+            <div class="label">Total Produksi (Karton)</div>
+            <div class="trend trend-up">▲ Lembur 3 Shift</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-erp);">87.3%</div>
+            <div class="label">OEE (Overall Equipment Effectiveness)</div>
+            <div class="trend trend-warn">⚠ Mendekati Batas Aman</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-erp);">4.000</div>
+            <div class="label">Stok Terendah (Karton)</div>
+            <div class="trend trend-up">▼ Safety Stock Terancam</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-erp);">Rp 2.8M</div>
+            <div class="label">Biaya Lembur / Hari</div>
+            <div class="trend trend-up">▲ +140% dari normal</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-grid">
+            <!-- Chart -->
+            <div>
+                <h3>🏭 Target Produksi vs Sisa Stok Gudang (Q1 2026)</h3>
+                <p class="narasi">
+                    Pabrik Indofood beroperasi dengan kapasitas maksimum untuk merespons sinyal dari CRM. 
+                    <strong>Combo Chart</strong> ini menunjukkan korelasi antara target produksi (bar) dan 
+                    sisa stok gudang (line) yang fluktuatif drastis.
+                </p>
+                <div class="chart-wrap">
+                    <canvas id="chartERP" height="280"></canvas>
+                </div>
+            </div>
+            <!-- Insight -->
+            <div class="insight-box insight-erp">
+                <div class="insight-title">🔍 Insight Integrasi ERP</div>
+                <p>
+                    Modul ERP menerima <em>demand signal</em> dari CRM dan merespons dengan meningkatkan target produksi. 
+                    Namun, data menunjukkan <strong>ketidakseimbangan kritis</strong>:
+                </p>
+                <ul>
+                    <li><strong>Bottleneck 14 Februari:</strong> Saat target produksi mencapai 20.000 karton, 
+                        stok gudang justru anjlok ke <strong>4.000 karton</strong> — hanya cukup untuk 
+                        <em>0.8 hari operasional</em>. Ini mengindikasikan produksi belum mampu mengejar demand.</li>
+                    <li><strong>Respons Kapasitas:</strong> ERP otomatis mengaktifkan <strong>Overtime Protocol</strong> 
+                        (3 shift × 24 jam) dan meng-<em>trigger</em> modul MRP untuk mempercepat pengadaan bahan baku 
+                        tepung terigu dari Bogasari.</li>
+                    <li><strong>Trigger ke SCM:</strong> Saat stok menyentuh <em>reorder point</em> (5.000 karton), 
+                        ERP secara otomatis mengirim <strong>Purchase Requisition (PR)</strong> ke modul SCM 
+                        untuk pengadaan darurat.</li>
+                    <li><strong>Pemulihan Maret:</strong> Stok meningkat ke 22.000 karton pada 12 Maret berkat 
+                        koordinasi ERP↔SCM, membuktikan efektivitas integrasi <em>closed-loop</em>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+    <div class="arrow">
+        <span>ERP mengirim PR ke SCM</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        <svg viewBox="0 0 24 24" style="transform: rotate(90deg);"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                  BAGIAN C — SCM                               -->
+<!-- ============================================================ -->
+<div class="section">
+    <div class="section-title">
+        <div class="dot" style="background: var(--accent-scm);"></div>
+        <div>
+            <h2>Bagian C: SCM — Supply Chain Management</h2>
+            <span class="label">Tulang Punggung Logistik &amp; Pengadaan</span>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-scm);">200</div>
+            <div class="label">Total Armada Aktif</div>
+            <div class="trend trend-warn">⚠ +50 sewa ekstra</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-scm);">97.5%</div>
+            <div class="label">On-Time Delivery Rate</div>
+            <div class="trend trend-down">✓ Target Tercapai</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-scm);">Rp 1.2M</div>
+            <div class="label">Biaya Sewa Ekstra / Hari</div>
+            <div class="trend trend-up">▲ Biaya Darurat</div>
+        </div>
+        <div class="kpi">
+            <div class="value" style="color: var(--accent-scm);">14</div>
+            <div class="label">Rute Distribusi Aktif</div>
+            <div class="trend trend-up">▲ 4 rute baru</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-grid">
+            <!-- Chart -->
+            <div>
+                <h3>🚛 Komposisi Armada Logistik (Maret 2026)</h3>
+                <p class="narasi">
+                    Untuk menyelamatkan distribusi yang terancam oleh keterbatasan produksi ERP, 
+                    divisi SCM melakukan <strong>pengadaan armada darurat</strong>. 
+                    Doughnut Chart berikut menunjukkan proporsi armada yang beroperasi.
+                </p>
+                <div class="chart-wrap" style="max-width: 380px; margin: 0 auto;">
+                    <canvas id="chartSCM" height="320"></canvas>
+                </div>
+            </div>
+            <!-- Insight -->
+            <div class="insight-box insight-scm">
+                <div class="insight-title">🔍 Insight Integrasi SCM</div>
+                <p>
+                    Modul SCM menjadi <strong>penyelamat terakhir</strong> dalam rantai integrasi CRM→ERP→SCM. 
+                    Data menunjukkan:
+                </p>
+                <ul>
+                    <li><strong>Pengadaan Darurat:</strong> Ketika ERP mengirim PR darurat karena stok 
+                        menyentuh 4.000 karton, SCM langsung mengaktifkan kontrak <em>spot-buy</em> 
+                        dengan <strong>50 truk sewa ekstra</strong> (25% dari total armada) — sebuah 
+                        keputusan yang dimungkinkan oleh visibilitas data real-time.</li>
+                    <li><strong>Closed-Loop Feedback:</strong> SCM mengirim balik data <em>delivery confirmation</em> 
+                        dan <em>lead time aktual</em> ke CRM, sehingga sales team dapat memberikan ETA akurat 
+                        kepada distributor — meningkatkan <strong>customer satisfaction score</strong> sebesar 12%.</li>
+                    <li><strong>Optimasi Biaya vs Risiko:</strong> Biaya sewa ekstra Rp 1.2M/hari adalah 
+                        <em>trade-off</em> yang terkalkulasi. Tanpa armada tambahan, potensi <strong>lost sales</strong> 
+                        mencapai Rp 8.5M/hari — saving ratio <strong>7:1</strong>.</li>
+                    <li><strong>Bukti Integrasi:</strong> Seluruh siklus — dari CRM mendeteksi lonjakan, 
+                        ERP merespons produksi, hingga SCM mengeksekusi distribusi — terjadi dalam 
+                        <strong>&lt;48 jam</strong>. Tanpa integrasi, siklus ini membutuhkan 2–3 minggu.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                  SUMMARY BANNER                               -->
+<!-- ============================================================ -->
+<div style="padding-top: 32px;"></div>
+<div class="summary-banner">
+    <div class="summary-card">
+        <h3>📋 Kesimpulan: Efek Domino Integrasi CRM → ERP → SCM</h3>
+        <p>
+            Studi kasus PT Indofood CBP membuktikan bahwa integrasi sistem <strong>CRM</strong>, <strong>ERP</strong>, 
+            dan <strong>SCM</strong> bukan sekadar konektivitas teknis, melainkan <strong>strategic enabler</strong> yang 
+            mengubah data menjadi keputusan bisnis real-time. Tanpa integrasi, setiap modul bekerja dalam silo: CRM 
+            hanya mencatat pesanan tanpa memicu produksi, ERP memproduksi tanpa visibilitas permintaan, dan SCM 
+            mengirim tanpa prioritas. Dengan integrasi end-to-end, <strong>demand signal</strong> dari CRM langsung 
+            men-<em>trigger</em> <strong>production planning</strong> di ERP, yang kemudian mengaktifkan 
+            <strong>procurement &amp; logistics</strong> di SCM — menciptakan <strong>closed-loop supply chain</strong> 
+            yang responsif, efisien, dan mampu menghadapi volatilitas permintaan musiman seperti bulan Puasa.
+        </p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                  FOOTER                                       -->
+<!-- ============================================================ -->
+<footer class="footer">
+    <p>
+        Dashboard dibuat untuk tugas mata kuliah <strong>Sistem Informasi Manajemen</strong> — Semester 3<br>
+        Studi Kasus: PT Indofood CBP Sukses Makmur Tbk. | Data bersifat simulasi untuk keperluan akademik.<br>
+        &copy; 2026 — Dibangun dengan Chart.js &amp; Vanilla CSS
+    </p>
+</footer>
+
+<!-- ============================================================ -->
+<!--                  CHART.JS SCRIPTS                             -->
+<!-- ============================================================ -->
+<script>
+    // ── Shared Defaults ──
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.padding = 16;
+
+    const LABELS = ['10-Jan', '15-Jan', '02-Feb', '14-Feb', '05-Mar', '12-Mar'];
+
+    // =============================================
+    // CHART A — CRM (Line Chart)
+    // =============================================
+    new Chart(document.getElementById('chartCRM'), {
+        type: 'line',
+        data: {
+            labels: LABELS,
+            datasets: [{
+                label: 'Volume Pesanan (Karton)',
+                data: [5000, 3000, 12000, 15000, 8000, 20000],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,.12)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 6,
+                pointBackgroundColor: '#3b82f6',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 9,
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('id-ID')} karton`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Jumlah Karton', font: { weight: '600' } },
+                    ticks: { callback: v => v.toLocaleString('id-ID') },
+                    grid: { color: 'rgba(0,0,0,.05)' }
+                },
+                x: {
+                    title: { display: true, text: 'Tanggal', font: { weight: '600' } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // =============================================
+    // CHART B — ERP (Combo: Bar + Line)
+    // =============================================
+    new Chart(document.getElementById('chartERP'), {
+        type: 'bar',
+        data: {
+            labels: LABELS,
+            datasets: [
+                {
+                    label: 'Target Produksi (Karton)',
+                    data: [10000, 5000, 15000, 20000, 10000, 25000],
+                    backgroundColor: 'rgba(245,158,11,.65)',
+                    borderColor: '#f59e0b',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    order: 2
+                },
+                {
+                    label: 'Sisa Stok Gudang (Karton)',
+                    data: [25000, 12000, 15000, 4000, 18000, 22000],
+                    type: 'line',
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239,68,68,.08)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 9,
+                    borderWidth: 3,
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('id-ID')} karton`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Jumlah Karton', font: { weight: '600' } },
+                    ticks: { callback: v => v.toLocaleString('id-ID') },
+                    grid: { color: 'rgba(0,0,0,.05)' }
+                },
+                x: {
+                    title: { display: true, text: 'Tanggal', font: { weight: '600' } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // =============================================
+    // CHART C — SCM (Doughnut Chart)
+    // =============================================
+    new Chart(document.getElementById('chartSCM'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Armada Reguler (150 Unit)', 'Truk Sewa Ekstra (50 Unit)'],
+            datasets: [{
+                data: [150, 50],
+                backgroundColor: ['#10b981', '#f97316'],
+                borderColor: ['#fff', '#fff'],
+                borderWidth: 4,
+                hoverOffset: 18
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '58%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, font: { size: 13 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                            return `${ctx.label}: ${ctx.parsed} unit (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw(chart) {
+                const { ctx, chartArea: { width, height, top } } = chart;
+                ctx.save();
+                ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
+                ctx.fillStyle = '#1e293b';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('200', width / 2 + chart.chartArea.left - chart.chartArea.left + chart.chartArea.left, top + height / 2 - 10);
+                ctx.font = '13px "Segoe UI", system-ui, sans-serif';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('Total Armada', width / 2 + chart.chartArea.left - chart.chartArea.left + chart.chartArea.left, top + height / 2 + 16);
+                ctx.restore();
+            }
+        }]
+    });
+</script>
+
+</body>
+</html>
